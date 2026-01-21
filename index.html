@@ -3,27 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MYSOCCER - Trực Tiếp Bóng Đá</title>
+    <title>MYSOCCER - Trực Tiếp Bóng Đá 24/7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #111; color: white; font-family: sans-serif; }
-        .card { background: white; color: black; border-radius: 12px; overflow: hidden; border: 2px solid #FFDE29; transition: 0.3s; }
+        .card { background: white; color: black; border-radius: 12px; overflow: hidden; border: 2px solid #FFDE29; transition: 0.3s; position: relative; }
+        .card:hover { transform: translateY(-5px); box-shadow: 0 10px 25px rgba(255,222,41,0.3); }
         .live-tag { background: #f00000; animation: blink 1.5s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     </style>
 </head>
 <body>
-    <header class="bg-black border-b-2 border-yellow-400 p-4 sticky top-0 z-50">
-        <div class="container mx-auto flex justify-between items-center">
-            <div class="text-2xl font-black text-yellow-400">MY<span class="text-white">SOCCER</span></div>
-            <div class="bg-red-600 px-3 py-1 rounded-full text-[10px] font-bold uppercase">Phát trực tiếp</div>
+    <header class="bg-black border-b-2 border-yellow-400 p-4 sticky top-0 z-50 flex justify-between items-center shadow-2xl">
+        <div class="text-2xl font-black text-yellow-400 tracking-tighter">MY<span class="text-white">SOCCER</span></div>
+        <div class="flex gap-4 items-center">
+            <span class="text-[10px] bg-red-600 text-white px-2 py-0.5 rounded font-bold animate-pulse">HỆ THỐNG AUTO</span>
         </div>
     </header>
 
     <main class="container mx-auto px-4 py-10">
-        <h1 class="text-2xl font-bold mb-10 text-center text-green-400 uppercase tracking-widest">TRẬN ĐẤU ĐANG DIỄN RA</h1>
-        <div id="match-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <p class="col-span-full text-center py-20 text-gray-400">Đang tìm kiếm luồng phát...</p>
+        <h1 class="text-3xl font-black mb-10 text-center text-yellow-400 uppercase tracking-tighter">DANH SÁCH TRẬN ĐẤU</h1>
+        <div id="match-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
+            <div class="col-span-full text-center py-20">
+                <div class="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-yellow-400"></div>
+                <p class="mt-2 text-gray-500">Đang quét luồng phát trực tiếp...</p>
+            </div>
         </div>
     </main>
 
@@ -34,65 +38,59 @@
                 const response = await fetch("/api/get-matches");
                 const resJson = await response.json();
                 
-                // Dữ liệu có thể nằm ở nhiều lớp: resJson.value hoặc resJson.data hoặc resJson.value.datas
-                let matches = resJson.data || resJson.value || resJson;
-                if (matches.datas) matches = matches.datas; // Trường hợp nccsc lồng sâu
+                // Lấy đúng mảng dữ liệu từ các lớp JSON khác nhau
+                let matches = resJson.data || resJson.value?.datas || resJson.value || resJson;
 
                 if (!Array.isArray(matches) || matches.length === 0) {
-                    grid.innerHTML = '<p class="col-span-full text-center">Hiện tại chưa có trận đấu nào.</p>';
+                    grid.innerHTML = '<p class="col-span-full text-center text-gray-500 italic">Hiện tại chưa có trận đấu nào khả dụng.</p>';
                     return;
                 }
 
                 grid.innerHTML = '';
                 matches.forEach(m => {
-                    // Tự động gán biến để tránh lỗi undefined
-                    const id = m.match_id || m.id || m.matchId;
-                    const home = m.home_name || m.homeName || "Chưa có tên";
-                    const away = m.away_name || m.awayName || "Chưa có tên";
-                    const hLogo = m.home_logo || m.homeLogo || "";
-                    const aLogo = m.away_logo || m.awayLogo || "";
-                    const hScore = m.home_score ?? 0;
-                    const aScore = m.away_score ?? 0;
-                    const league = m.league_name || "Giải đấu";
-
-                    // Nếu đang có tỉ số hoặc status=1 thì là đang đá
-                    const isLive = m.status == "1" || hScore > 0 || aScore > 0;
+                    const id = m.match_id || m.id;
+                    const home = m.home_name || m.homeName;
+                    const away = m.away_name || m.awayName;
+                    const hLogo = m.home_logo || m.homeLogo;
+                    const aLogo = m.away_logo || m.awayLogo;
+                    
+                    // Logic xác định trạng thái Live chuẩn xác
+                    const isLive = m.status == "1" || m.status == 1 || (m.home_score + m.away_score > 0);
+                    const statusText = isLive ? "ĐANG TRỰC TIẾP" : "SẮP DIỄN RA";
+                    const statusColor = isLive ? "text-red-600" : "text-gray-400";
 
                     grid.innerHTML += `
-                        <div class="card p-4 flex flex-col gap-4 shadow-xl">
-                            <div class="flex justify-between items-center text-[10px] font-bold text-gray-500 uppercase">
-                                <span class="truncate w-32">${league}</span>
-                                <span class="live-tag text-white px-2 py-0.5 rounded">LIVE</span>
+                        <div class="card p-5 flex flex-col gap-5 shadow-lg">
+                            <div class="flex justify-between items-center text-[10px] font-black text-gray-400">
+                                <span class="truncate w-32 uppercase tracking-tight">${m.league_name || "Giải đấu"}</span>
+                                ${isLive ? '<span class="live-tag text-white px-2 py-0.5 rounded">LIVE</span>' : ''}
                             </div>
                             <div class="flex items-center justify-between">
-                                <div class="flex flex-col items-center w-[40%] text-center">
-                                    <img src="${hLogo}" class="size-10 object-contain mb-1" onerror="this.src='https://via.placeholder.com/40'">
-                                    <span class="text-[11px] font-bold h-8 overflow-hidden">${home}</span>
+                                <div class="flex flex-col items-center w-[40%]">
+                                    <img src="${hLogo}" class="size-12 object-contain mb-2 p-1 border rounded-full" onerror="this.src='https://via.placeholder.com/40'">
+                                    <span class="text-[11px] font-bold text-center leading-tight h-8 overflow-hidden">${home}</span>
                                 </div>
-                                <div class="text-xl font-black text-blue-900 w-[20%] text-center">
-                                    ${hScore} - ${aScore}
+                                <div class="flex flex-col items-center w-[20%]">
+                                    <span class="text-2xl font-black text-blue-900">${m.home_score || 0}-${m.away_score || 0}</span>
+                                    <span class="text-[9px] font-bold ${statusColor} mt-1">${statusText}</span>
                                 </div>
-                                <div class="flex flex-col items-center w-[40%] text-center">
-                                    <img src="${aLogo}" class="size-10 object-contain mb-1" onerror="this.src='https://via.placeholder.com/40'">
-                                    <span class="text-[11px] font-bold h-8 overflow-hidden">${away}</span>
+                                <div class="flex flex-col items-center w-[40%]">
+                                    <img src="${aLogo}" class="size-12 object-contain mb-2 p-1 border rounded-full" onerror="this.src='https://via.placeholder.com/40'">
+                                    <span class="text-[11px] font-bold text-center leading-tight h-8 overflow-hidden">${away}</span>
                                 </div>
                             </div>
-                            <div class="text-center text-[10px] font-bold ${isLive ? 'text-red-500' : 'text-gray-400'}">
-                                ${isLive ? 'ĐANG TRỰC TIẾP' : 'SẮP DIỄN RA'}
-                            </div>
-                            <a href="watch.html?id=${id}" class="block bg-blue-700 hover:bg-blue-800 text-white text-center py-2.5 rounded-lg font-black text-xs transition uppercase">
-                                Xem ngay
+                            <a href="watch.html?id=${id}" class="block w-full bg-blue-700 hover:bg-blue-800 text-white text-center py-3 rounded-lg font-black text-xs transition uppercase tracking-widest">
+                                Xem Ngay
                             </a>
                         </div>
                     `;
                 });
             } catch (e) {
-                console.log(e);
-                grid.innerHTML = '<p class="col-span-full text-center text-red-500">Lỗi kết nối Server. Vui lòng F5.</p>';
+                grid.innerHTML = '<p class="col-span-full text-center text-red-500">Lỗi kết nối API. Vui lòng F5.</p>';
             }
         }
         fetchMatches();
-        setInterval(fetchMatches, 30000); // Tự cập nhật tỉ số mỗi 30 giây
+        setInterval(fetchMatches, 20000); // Cập nhật nhanh hơn (20s)
     </script>
 </body>
 </html>
