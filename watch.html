@@ -3,54 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đang xem: Trực tiếp bóng đá - MYSOCCER</title>
+    <title>Đang xem Trực Tiếp - MYSOCCER</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/artplayer/dist/artplayer.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
     <style>
-        body { background-color: #141516; color: white; }
-        .video-container { aspect-ratio: 16/9; background: #000; }
-        .ad-slot { background: #1f2937; border: 1px dashed #4b5563; text-align: center; color: #9ca3af; }
+        body { background-color: #0f172a; color: white; }
+        .player-box { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; border: 2px solid #334155; }
     </style>
 </head>
 <body>
-    <header class="bg-[#0a0a0a] border-b border-yellow-400 p-4">
-        <div class="container mx-auto">
-            <a href="index.html" class="text-2xl font-bold text-yellow-400">MY<span class="text-white">SOCCER</span></a>
+    <header class="bg-[#020617] border-b border-yellow-500 p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="index.html" class="text-2xl font-black text-yellow-400">MY<span class="text-white">SOCCER</span></a>
+            <span class="text-xs text-red-500 font-bold animate-pulse">● ĐANG PHÁT TRỰC TIẾP</span>
         </div>
     </header>
 
-    <main class="container mx-auto p-4">
-        <div class="flex flex-col lg:flex-row gap-6">
+    <main class="container mx-auto p-4 flex flex-col lg:flex-row gap-6 mt-4">
+        <div class="lg:w-[70%]">
+            <div class="player-box mb-4 shadow-2xl shadow-blue-900/20" id="video-container"></div>
             
-            <div class="lg:w-2/3 flex flex-col gap-4">
-                <div class="ad-slot p-2 h-20 rounded"> [BANNER QUẢNG CÁO CỦA BẠN - 728x90] </div>
-
-                <div id="video-player" class="video-container rounded-lg overflow-hidden shadow-2xl"></div>
-
-                <div class="bg-white text-black p-4 rounded-lg flex justify-between items-center">
-                    <div id="match-info" class="font-bold text-lg">Đang tải thông tin trận đấu...</div>
-                    <div class="flex gap-2">
-                        <button class="bg-red-600 text-white px-4 py-1 rounded text-sm font-bold animate-pulse">LIVE</button>
-                    </div>
+            <div class="bg-[#1e293b] p-6 rounded-xl border border-gray-700 shadow-lg">
+                <h1 id="match-title" class="text-2xl font-extrabold text-[#a0fb64] mb-2 uppercase">Đang tải tên trận đấu...</h1>
+                <div class="flex items-center gap-4 text-sm text-gray-300">
+                    <span>🔥 Full HD+</span>
+                    <span>⚡ Không Giật Lag</span>
+                    <span class="bg-blue-600 text-white px-2 py-0.5 rounded text-[10px]">Server VIP</span>
                 </div>
-
-                <div class="ad-slot p-4 h-32 rounded"> [BANNER QUẢNG CÁO CỦA BẠN - TĂNG DOANH THU] </div>
             </div>
 
-            <div class="lg:w-1/3 flex flex-col gap-4">
-                <div class="bg-gray-900 rounded-lg overflow-hidden border border-gray-700 h-[500px]">
-                    <div class="bg-gray-800 p-3 font-bold border-b border-gray-700 text-yellow-400">PHÒNG CHAT SÔI NỔI</div>
-                    <iframe id="chat-frame" src="" class="w-full h-full border-0"></iframe>
-                </div>
-                
-                <div class="ad-slot p-4 h-60 rounded"> [QUẢNG CÁO DỌC SIDEBAR] </div>
+            <div class="mt-6 bg-[#111827] border border-dashed border-yellow-600/50 p-10 text-center rounded-xl">
+                <p class="text-yellow-500 font-bold mb-2">QUẢNG CÁO ĐỘC QUYỀN</p>
+                <div class="text-gray-400">[ Chèn ảnh nhà cái/game của bạn tại đây ]</div>
+            </div>
+        </div>
+
+        <div class="lg:w-[30%]">
+            <div class="bg-[#020617] rounded-xl overflow-hidden border border-gray-700 h-[600px] flex flex-col shadow-xl">
+                <div class="bg-gray-800 p-3 text-center font-bold text-sm border-b border-gray-700 uppercase tracking-widest text-yellow-400">Cộng đồng MySoccer</div>
+                <iframe id="chat-frame" src="" class="w-full flex-1 border-0"></iframe>
             </div>
         </div>
     </main>
 
     <script>
-        // 1. Lấy Match ID từ URL (?id=...)
         const urlParams = new URLSearchParams(window.location.search);
         const matchId = urlParams.get('id');
 
@@ -58,15 +55,14 @@
             window.location.href = 'index.html';
         }
 
-        // 2. Cấu hình khung Chat
+        // Tích hợp khung chat từ nguồn nccsc tự động theo ID trận
         document.getElementById('chat-frame').src = `https://ls01.tv/embed-chat/${matchId}`;
 
-        // 3. Khởi tạo Trình phát Video (ArtPlayer)
-        // Lưu ý: Link m3u8 thực tế thường có dạng: https://cdn.../matchId/index.m3u8
-        // Ở đây ta dùng một link placeholder, bạn cần logic lấy link thật từ API ở bước trước.
+        // Cấu hình Player phát link m3u8 (HLS)
+        // Lưu ý: Link m3u8 này cần bot quét ra link thật, ở đây dùng cấu trúc mặc định
         const art = new ArtPlayer({
-            container: '#video-player',
-            url: `https://vips-stream.akamaized.net/live/${matchId}/playlist.m3u8`, // Cấu trúc link CDN phổ biến
+            container: '#video-container',
+            url: `https://vips-stream.akamaized.net/live/${matchId}/playlist.m3u8`, 
             type: 'm3u8',
             customType: {
                 m3u8: function (video, url) {
@@ -79,15 +75,15 @@
                     }
                 },
             },
-            autoSize: true,
             fullscreen: true,
             autoplay: true,
-            volume: 0.7,
+            pip: true,
             setting: true,
+            theme: '#FFDE29',
         });
 
-        // Tải thông tin trận đấu để hiển thị tiêu đề (Giả lập fetch từ API)
-        document.getElementById('match-info').innerText = "Trận đấu ID: " + matchId;
+        // Giả lập lấy tên trận (Bạn có thể lấy từ API nếu muốn xịn hơn)
+        document.getElementById('match-title').innerText = "Trận đấu đang diễn ra - Xem Full HD";
     </script>
 </body>
 </html>
