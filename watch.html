@@ -6,34 +6,59 @@
     <title>Đang xem Trực Tiếp - MYSOCCER</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0a0a0a; color: white; }
-        .video-box { width: 100%; aspect-ratio: 16/9; background: #000; border: 1px solid #333; }
+        body { background-color: #0a0a0a; color: white; overflow-x: hidden; }
+        .video-wrapper { width: 100%; aspect-ratio: 16/9; position: relative; background: #000; border-radius: 12px; border: 1px solid #333; }
+        /* Lớp mặt nạ để che đi lỗi 404/Redirect của trang gốc */
+        #loading-mask {
+            position: absolute; inset: 0; background: #000; z-index: 50;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
     </style>
 </head>
 <body>
-    <header class="p-4 border-b border-gray-800 flex justify-between">
-        <a href="index.html" class="text-yellow-400 font-bold">← TRỞ LẠI</a>
-        <div class="text-xl font-black text-yellow-400 uppercase">MY<span class="text-white">SOCCER</span></div>
+    <header class="p-4 border-b border-gray-800 flex justify-between items-center bg-black sticky top-0 z-[100]">
+        <a href="index.html" class="text-yellow-400 font-bold flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
+            QUAY LẠI
+        </a>
+        <div class="text-xl font-black text-yellow-400">MY<span class="text-white">SOCCER</span></div>
     </header>
 
     <main class="container mx-auto p-4 flex flex-col lg:flex-row gap-4">
-        <div class="lg:w-2/3">
-            <div class="video-box rounded-lg overflow-hidden relative">
+        <div class="lg:w-[70%]">
+            <div class="video-wrapper shadow-2xl overflow-hidden">
+                <div id="loading-mask">
+                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-400 mb-4"></div>
+                    <p class="text-yellow-400 font-bold animate-pulse uppercase tracking-tighter">Đang kết nối luồng phát VIP...</p>
+                    <p class="text-gray-500 text-[10px] mt-2 italic">Vui lòng chờ trong giây lát (Auto Bypass)</p>
+                </div>
+                
                 <iframe id="video-frame" 
                         src="" 
                         class="w-full h-full border-0" 
+                        allow="autoplay; fullscreen" 
                         allowfullscreen="true" 
                         scrolling="no">
                 </iframe>
             </div>
-            <div class="mt-4 p-4 bg-gray-900 rounded-lg">
-                <h2 class="text-lg font-bold text-green-400">CHẾ ĐỘ XEM SIÊU MƯỢT</h2>
-                <p class="text-xs text-gray-400 mt-1 italic">Lưu ý: Nếu video đứng, hãy chọn server khác trong trình phát.</p>
+
+            <div class="mt-4 p-5 bg-zinc-900 rounded-xl border border-zinc-800">
+                <h2 class="text-xl font-black text-green-400 uppercase italic">Link Xem Trực Tiếp Tốc Độ Cao</h2>
+                <div class="flex gap-4 mt-2 text-[11px] font-bold text-gray-400 uppercase">
+                    <span>• Không Quảng Cáo Rác</span>
+                    <span>• Full HD 1080p</span>
+                    <span>• Bình Luận Tiếng Việt</span>
+                </div>
+            </div>
+            
+            <div class="mt-6 bg-zinc-900 border border-dashed border-zinc-700 p-8 text-center rounded-xl text-zinc-500 font-bold">
+                [ CHÈN BANNER QUẢNG CÁO CỦA BẠN TẠI ĐÂY ]
             </div>
         </div>
 
-        <div class="lg:w-1/3">
-            <div class="video-box rounded-lg h-[500px] border border-gray-800">
+        <div class="lg:w-[30%]">
+            <div class="video-wrapper h-[550px] border border-gray-800 bg-zinc-900">
+                <div class="bg-zinc-800 p-3 text-center text-xs font-black uppercase text-yellow-400 border-b border-zinc-700">Phòng Chat Cộng Đồng</div>
                 <iframe id="chat-frame" src="" class="w-full h-full border-0"></iframe>
             </div>
         </div>
@@ -44,13 +69,19 @@
         const matchId = urlParams.get('id');
 
         if (!matchId || matchId === 'undefined') {
-            alert("Trận đấu này đã kết thúc hoặc ID không đúng!");
             window.location.href = 'index.html';
         } else {
-            // Nhúng trực tiếp Player từ trang gốc để lấy video mới nhất
+            // Nhúng player LuongSon (Sử dụng domain trực tiếp để giảm redirect)
             document.getElementById('video-frame').src = `https://ls01.tv/live/${matchId}`;
-            // Nhúng khung chat
             document.getElementById('chat-frame').src = `https://ls01.tv/embed-chat/${matchId}`;
+
+            // Tự động ẩn lớp mặt nạ sau 6 giây (Thời gian đủ để trang gốc bypass lỗi 404)
+            setTimeout(() => {
+                const mask = document.getElementById('loading-mask');
+                mask.style.transition = "opacity 1s ease";
+                mask.style.opacity = "0";
+                setTimeout(() => mask.style.display = "none", 1000);
+            }, 6000); 
         }
     </script>
 </body>
