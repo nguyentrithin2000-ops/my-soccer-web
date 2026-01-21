@@ -3,32 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MYSOCCER - Trực Tiếp Thể Thao Đa Năng</title>
+    <title>MYSOCCER - Thể Thao Trực Tuyến</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
-        body { background-color: #0f172a; color: white; font-family: 'Inter', sans-serif; }
-        .sport-btn.active { background: #FFDE29; color: black; }
-        .match-card { background: white; color: black; border-radius: 15px; border: 2px solid transparent; transition: 0.3s; }
-        .match-card:hover { border-color: #FFDE29; transform: translateY(-5px); }
-        .live-dot { height: 8px; width: 8px; background-color: #f00; border-radius: 50%; display: inline-block; margin-right: 5px; animation: blink 1s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+        body { background-color: #0f172a; color: white; font-family: 'Lexend', sans-serif; }
+        .active-tab { background: #FFDE29 !important; color: black !important; }
+        .match-card { background: white; color: black; border-radius: 16px; border: 2px solid #1e293b; transition: 0.3s; }
+        .match-card:hover { border-color: #FFDE29; transform: translateY(-5px); box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        .live-tag { background: #f00; animation: blink 1s infinite; }
+        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.3; } }
     </style>
 </head>
 <body>
-    <header class="bg-black/90 backdrop-blur-md border-b border-yellow-500/50 p-4 sticky top-0 z-50 shadow-2xl">
-        <div class="container mx-auto flex justify-between items-center">
+    <header class="bg-black/80 backdrop-blur-md border-b border-yellow-500/30 p-4 sticky top-0 z-50">
+        <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="text-3xl font-black text-yellow-400 tracking-tighter">MY<span class="text-white">SOCCER</span></div>
-            <div class="flex bg-gray-800 rounded-full p-1 gap-1 shadow-inner">
-                <button onclick="changeSport('football')" id="btn-football" class="sport-btn active px-4 py-1.5 rounded-full text-xs font-bold transition-all uppercase">Bóng đá</button>
-                <button onclick="changeSport('basketball')" id="btn-basketball" class="sport-btn px-4 py-1.5 rounded-full text-xs font-bold transition-all uppercase text-gray-400">Bóng rổ</button>
+            
+            <div class="flex bg-gray-800 rounded-2xl p-1 gap-1 w-full md:w-auto">
+                <button onclick="changeSport('football')" id="tab-football" class="active-tab flex-1 md:w-32 py-2 rounded-xl text-xs font-black uppercase transition-all">⚽ Bóng đá</button>
+                <button onclick="changeSport('basketball')" id="tab-basketball" class="flex-1 md:w-32 py-2 rounded-xl text-xs font-black uppercase text-gray-400 hover:text-white transition-all">🏀 Bóng rổ</button>
             </div>
         </div>
     </header>
 
     <main class="container mx-auto px-4 py-8">
         <div id="match-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <div class="col-span-full text-center py-20 text-gray-400 font-bold animate-pulse">
-                ĐANG QUÉT HỆ THỐNG TRỰC TIẾP...
+            <div class="col-span-full text-center py-20">
+                <div class="inline-block animate-spin rounded-full h-10 w-10 border-b-2 border-yellow-400"></div>
+                <p class="mt-4 text-gray-400 font-bold uppercase tracking-widest">Đang kết nối luồng trực tiếp...</p>
             </div>
         </div>
     </main>
@@ -37,76 +40,82 @@
         let currentSport = 'football';
         let allMatches = [];
 
-        async function fetchData() {
+        async function loadData() {
             try {
+                // Gọi API trung chuyển từ folder api/
                 const response = await fetch("/api/get-matches");
-                const res = await response.json();
-                // Phá cấu trúc dữ liệu nccsc
-                allMatches = res.data || res.value?.datas || res.value || [];
-                renderMatches();
+                const resJson = await response.json();
+                
+                // NCCSC trả về mảng ở nhiều vị trí, ta gom lại:
+                allMatches = resJson.data || resJson.value?.datas || resJson.value || [];
+                render();
             } catch (e) {
-                document.getElementById('match-grid').innerHTML = "Lỗi kết nối Server!";
+                document.getElementById('match-grid').innerHTML = "<p class='col-span-full text-center text-red-500 font-bold'>LỖI KẾT NỐI SERVER!</p>";
             }
         }
 
         function changeSport(type) {
             currentSport = type;
-            document.querySelectorAll('.sport-btn').forEach(b => b.classList.remove('active', 'text-black'));
-            document.querySelectorAll('.sport-btn').forEach(b => b.classList.add('text-gray-400'));
-            document.getElementById(`btn-${type}`).classList.add('active', 'text-black');
-            renderMatches();
+            document.getElementById('tab-football').className = type === 'football' ? 'active-tab flex-1 md:w-32 py-2 rounded-xl text-xs font-black uppercase' : 'flex-1 md:w-32 py-2 rounded-xl text-xs font-black uppercase text-gray-400 hover:text-white';
+            document.getElementById('tab-basketball').className = type === 'basketball' ? 'active-tab flex-1 md:w-32 py-2 rounded-xl text-xs font-black uppercase' : 'flex-1 md:w-32 py-2 rounded-xl text-xs font-black uppercase text-gray-400 hover:text-white';
+            render();
         }
 
-        function renderMatches() {
+        function render() {
             const grid = document.getElementById('match-grid');
             grid.innerHTML = '';
 
-            // Lọc dữ liệu: Bóng rổ thường có chữ NBA, NBL, CBA, hoặc bóng rổ trong league_name
             const filtered = allMatches.filter(m => {
-                const league = (m.league_name || "").toLowerCase();
-                const isBasketball = league.includes('nba') || league.includes('nbl') || league.includes('rổ') || league.includes('basketball');
-                return currentSport === 'basketball' ? isBasketball : !isBasketball;
+                const lg = (m.league_name || "").toLowerCase();
+                const isBasket = lg.includes('nba') || lg.includes('nbl') || lg.includes('cba') || lg.includes('bóng rổ');
+                return currentSport === 'basketball' ? isBasket : !isBasket;
             });
 
             if (filtered.length === 0) {
-                grid.innerHTML = `<p class="col-span-full text-center py-10 text-gray-500">Hiện không có trận ${currentSport === 'football' ? 'bóng đá' : 'bóng rổ'} nào.</p>`;
+                grid.innerHTML = `<p class="col-span-full text-center py-20 text-gray-500 italic">Hiện không có trận đấu ${currentSport == 'football' ? 'bóng đá' : 'bóng rổ'} nào.</p>`;
                 return;
             }
 
             filtered.forEach(m => {
-                const mid = m.match_id || m.id; // Quan trọng để fix lỗi link
-                const isLive = m.status == "1" || (m.home_score + m.away_score > 0);
+                // Sửa lỗi ID: nccsc dùng match_id (chuỗi dài) để phát video
+                const mid = m.match_id || m.id; 
+                const hName = m.home_name || m.homeName || "Đội nhà";
+                const aName = m.away_name || m.awayName || "Đội khách";
+                const hLogo = m.home_logo || m.homeLogo || "https://via.placeholder.com/50";
+                const aLogo = m.away_logo || m.awayLogo || "https://via.placeholder.com/50";
+                const hScore = m.home_score ?? 0;
+                const aScore = m.away_score ?? 0;
 
                 grid.innerHTML += `
-                    <div class="match-card p-4 shadow-xl">
-                        <div class="flex justify-between items-center mb-3 text-[10px] font-bold text-gray-400 border-b pb-2 uppercase">
-                            <span class="truncate w-3/4">${m.league_name || 'Tournament'}</span>
-                            <span class="text-red-500 flex items-center"><span class="live-dot"></span> LIVE</span>
+                    <div class="match-card p-5 flex flex-col gap-4 shadow-2xl">
+                        <div class="flex justify-between items-center border-b pb-2">
+                            <span class="text-[10px] font-black text-gray-500 uppercase truncate w-40">${m.league_name}</span>
+                            <span class="live-tag text-white px-2 py-0.5 rounded text-[9px] font-bold">LIVE</span>
                         </div>
-                        <div class="flex items-center justify-between gap-2 mb-4">
+                        <div class="flex items-center justify-between gap-2">
                             <div class="w-[35%] flex flex-col items-center">
-                                <img src="${m.home_logo}" class="size-10 object-contain mb-1 shadow-md rounded-full p-0.5 border" onerror="this.src='https://via.placeholder.com/40'">
-                                <span class="text-[11px] font-black text-center h-8 overflow-hidden">${m.home_name}</span>
+                                <img src="${hLogo}" class="size-12 object-contain mb-2 rounded-full border p-1 shadow-inner">
+                                <span class="text-[11px] font-black text-center h-8 overflow-hidden leading-tight">${hName}</span>
                             </div>
-                            <div class="w-[30%] flex flex-col items-center">
-                                <span class="text-2xl font-black text-blue-900">${m.home_score || 0}-${m.away_score || 0}</span>
-                                <span class="text-[9px] font-bold text-gray-400">Phút: ${m.time_status || 'Live'}</span>
+                            <div class="w-[30%] flex flex-col items-center justify-center">
+                                <span class="text-2xl font-black text-blue-900">${hScore}-${aScore}</span>
+                                <span class="text-[9px] font-bold text-red-600 mt-1 uppercase italic">${m.time_status || 'Đang đá'}</span>
                             </div>
                             <div class="w-[35%] flex flex-col items-center">
-                                <img src="${m.away_logo}" class="size-10 object-contain mb-1 shadow-md rounded-full p-0.5 border" onerror="this.src='https://via.placeholder.com/40'">
-                                <span class="text-[11px] font-black text-center h-8 overflow-hidden">${m.away_name}</span>
+                                <img src="${aLogo}" class="size-12 object-contain mb-2 rounded-full border p-1 shadow-inner">
+                                <span class="text-[11px] font-black text-center h-8 overflow-hidden leading-tight">${aName}</span>
                             </div>
                         </div>
-                        <a href="watch.html?id=${mid}" class="block bg-blue-600 hover:bg-yellow-400 hover:text-black text-white text-center py-2.5 rounded-xl font-black text-xs transition-all uppercase tracking-tighter">
-                            Vào Xem Ngay
+                        <a href="watch.html?id=${mid}" class="block bg-blue-700 hover:bg-yellow-400 hover:text-black text-white text-center py-3 rounded-xl font-black text-xs transition-all uppercase tracking-widest">
+                            XEM TRỰC TIẾP
                         </a>
                     </div>
                 `;
             });
         }
 
-        fetchData();
-        setInterval(fetchData, 30000);
+        loadData();
+        setInterval(loadData, 30000); // Tự động load lại sau 30 giây
     </script>
 </body>
 </html>
