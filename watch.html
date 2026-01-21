@@ -3,38 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LIVE VIP - MYSOCCER</title>
+    <title>XEM TRỰC TIẾP VIP - MYSOCCER</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #020617; color: white; }
-        .player-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; border: 2px solid #1e293b; overflow: hidden; position: relative; }
-        #loading-overlay { position: absolute; inset: 0; background: #000; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .player-box { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; border: 2px solid #1e293b; overflow: hidden; position: relative; }
+        #loader { position: absolute; inset: 0; background: #000; z-index: 50; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
-    <header class="p-4 bg-black border-b border-gray-800 flex justify-between items-center">
-        <a href="index.html" class="bg-gray-800 px-4 py-2 rounded-lg text-sm font-bold text-yellow-400 hover:bg-gray-700">← QUAY LẠI</a>
-        <div class="text-xl font-black text-yellow-400 italic">LIVE STREAM VIP</div>
+    <header class="p-4 bg-black border-b border-gray-800 flex justify-between items-center shadow-lg">
+        <a href="index.html" class="bg-gray-800 px-4 py-2 rounded-lg text-sm font-bold text-yellow-400 hover:bg-gray-700 transition">← DANH SÁCH</a>
+        <div class="text-xl font-black text-yellow-400 italic uppercase">LUỒNG PHÁT VIP</div>
     </header>
 
-    <main class="container mx-auto p-4 flex flex-col lg:flex-row gap-4">
+    <main class="container mx-auto p-4 flex flex-col lg:flex-row gap-4 mt-2">
         <div class="lg:w-3/4">
-            <div class="player-container shadow-2xl">
-                <div id="loading-overlay">
-                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-yellow-400 mb-4"></div>
-                    <span class="text-xs font-black uppercase text-yellow-400">Đang đồng bộ luồng phát VIP...</span>
+            <div class="player-box shadow-2xl shadow-blue-500/10">
+                <div id="loader">
+                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-400 mb-4"></div>
+                    <span class="text-xs font-black uppercase text-yellow-400 tracking-widest animate-pulse">Đang kết nối Server 4K...</span>
                 </div>
-                <iframe id="video-frame" src="" class="w-full h-full border-0" allowfullscreen="true" scrolling="no" allow="autoplay; fullscreen"></iframe>
+                <iframe id="video-frame" src="" class="w-full h-full border-0" allow="autoplay; fullscreen" allowfullscreen="true" scrolling="no"></iframe>
             </div>
-            <div class="mt-4 p-5 bg-[#0f172a] rounded-2xl border border-gray-800">
-                <h2 class="text-xl font-black text-green-400 uppercase italic">TỐC ĐỘ CAO - KHÔNG QUẢNG CÁO</h2>
-                <p class="text-[10px] text-gray-500 font-bold uppercase mt-1">Cung cấp bởi MySoccer Global Server</p>
+
+            <div class="mt-4 p-5 bg-[#0f172a] rounded-2xl border border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4 shadow-lg">
+                <div>
+                    <h2 class="text-xl font-black text-green-400 uppercase italic tracking-tighter">TRỰC TIẾP TỐC ĐỘ CAO</h2>
+                    <p class="text-[10px] text-gray-500 font-bold uppercase mt-1">Hệ thống MySoccer - Full HD 1080p - Không quảng cáo</p>
+                </div>
+                <div class="flex gap-2">
+                    <span class="bg-red-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase animate-bounce">Live</span>
+                </div>
+            </div>
+
+            <div class="mt-6 bg-[#0a0f1e] border-2 border-dashed border-gray-800 p-10 text-center rounded-2xl text-gray-600 font-black">
+                [ QUẢNG CÁO CỦA BẠN TẠI ĐÂY - LIÊN HỆ TELEGRAM @MYSOCCER ]
             </div>
         </div>
 
         <div class="lg:w-1/4">
-            <div class="player-container h-[550px] bg-black border-gray-800">
-                <div class="bg-gray-900 p-2 text-center text-[10px] font-black uppercase text-yellow-500 border-b border-gray-800">Cộng đồng sôi nổi</div>
+            <div class="player-box h-[550px] bg-black border-gray-800 shadow-xl">
+                <div class="bg-gray-900 p-2 text-center text-[10px] font-black uppercase text-yellow-500 border-b border-gray-800 tracking-widest">Cộng đồng MySoccer</div>
                 <iframe id="chat-frame" src="" class="w-full h-full border-0"></iframe>
             </div>
         </div>
@@ -45,16 +55,19 @@
         const matchId = params.get('id');
 
         if (matchId && matchId !== 'undefined') {
-            // Nhúng luồng phát trực tiếp
+            // Nhúng thẳng link trình phát để bỏ qua trang 404/Redirect 8 giây
             document.getElementById('video-frame').src = `https://ls01.tv/live/${matchId}`;
             document.getElementById('chat-frame').src = `https://ls01.tv/embed-chat/${matchId}`;
 
-            // Ẩn màn hình chờ sau 5 giây khi video đã sẵn sàng
+            // Tự động ẩn loader sau 4 giây khi iframe đã bắt đầu nạp video
             setTimeout(() => {
-                document.getElementById('loading-overlay').style.display = 'none';
-            }, 5000);
+                const loader = document.getElementById('loader');
+                loader.style.transition = "opacity 1s ease";
+                loader.style.opacity = "0";
+                setTimeout(() => loader.style.display = 'none', 1000);
+            }, 4000);
         } else {
-            document.getElementById('loading-overlay').innerHTML = "<p class='text-red-500 font-black italic'>DỮ LIỆU TRẬN ĐẤU KHÔNG HỢP LỆ!</p>";
+            document.getElementById('loader').innerHTML = "<p class='text-red-500 font-black italic'>DỮ LIỆU TRẬN ĐẤU KHÔNG HỢP LỆ!</p>";
         }
     </script>
 </body>
