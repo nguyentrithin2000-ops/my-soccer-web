@@ -3,59 +3,54 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MYSOCCER - Live Sports 2026</title>
+    <title>MYSOCCER - Thể Thao Trực Tuyến 24/7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #0f172a; color: white; font-family: sans-serif; }
-        .active-tab { background: #FFDE29 !important; color: black !important; }
-        .match-card { background: white; color: black; border-radius: 12px; border: 2px solid #1e293b; transition: 0.3s; overflow: hidden; }
-        .match-card:hover { border-color: #FFDE29; transform: translateY(-5px); }
-        .live-tag { background: #f00; animation: blink 1.2s infinite; }
-        @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+        .tab-btn.active { background: #FFDE29; color: #000; font-weight: 900; }
+        .match-card { background: white; color: black; border-radius: 16px; border: 2px solid #1e293b; transition: 0.3s; overflow: hidden; }
+        .match-card:hover { border-color: #FFDE29; transform: translateY(-3px); }
+        .live-tag { background: #f00; animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
-    <header class="bg-black border-b border-yellow-500/30 p-4 sticky top-0 z-50">
+    <header class="bg-black border-b border-yellow-500/30 p-4 sticky top-0 z-50 shadow-xl">
         <div class="container mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="text-3xl font-black text-yellow-400">MY<span class="text-white">SOCCER</span></div>
+            <div class="text-3xl font-black text-yellow-400 italic tracking-tighter">MY<span class="text-white">SOCCER</span></div>
             <div class="flex bg-gray-800 rounded-2xl p-1 gap-1 w-full md:w-auto">
-                <button onclick="changeSport(1)" id="tab-1" class="active-tab flex-1 md:w-32 py-2 rounded-xl text-xs font-black uppercase">⚽ Bóng đá</button>
-                <button onclick="changeSport(2)" id="tab-2" class="flex-1 md:w-32 py-2 rounded-xl text-xs font-black uppercase text-gray-400">🏀 Bóng rổ</button>
+                <button onclick="setSport(1)" id="btn-1" class="tab-btn active flex-1 md:w-32 py-2 rounded-xl text-xs uppercase transition-all">⚽ Bóng đá</button>
+                <button onclick="setSport(2)" id="btn-2" class="tab-btn flex-1 md:w-32 py-2 rounded-xl text-xs uppercase text-gray-400 hover:text-white transition-all">🏀 Bóng rổ</button>
             </div>
         </div>
     </header>
 
     <main class="container mx-auto px-4 py-8">
         <div id="match-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <div class="col-span-full text-center py-20">Đang khởi tạo luồng dữ liệu...</div>
+            <div class="col-span-full text-center py-20 text-gray-400 font-bold animate-pulse">ĐANG KẾT NỐI HỆ THỐNG TRUYỀN HÌNH...</div>
         </div>
     </main>
 
     <script>
-        let currentSportId = 1; // 1: Bóng đá, 2: Bóng rổ
-        let allMatches = [];
+        let sportId = 1; // Mặc định bóng đá
+        let allData = [];
 
         async function loadMatches() {
             try {
                 const response = await fetch("/api/get-matches");
-                const resJson = await response.json();
-                
-                // Thuật toán đào sâu dữ liệu để tìm mảng trận đấu chính xác
-                let data = resJson.data || resJson.value || resJson;
-                if (data.datas) data = data.datas;
-                if (!Array.isArray(data)) data = Object.values(data).filter(item => Array.isArray(item))[0] || [];
-
-                allMatches = data;
+                const res = await response.json();
+                // NCCSC trả về dữ liệu lồng nhau: datas nằm trong value hoặc data
+                allData = res.data || res.value?.datas || res.value || [];
                 render();
             } catch (e) {
-                document.getElementById('match-grid').innerHTML = "Lỗi kết nối. Vui lòng F5!";
+                document.getElementById('match-grid').innerHTML = "Lỗi Server!";
             }
         }
 
-        function changeSport(id) {
-            currentSportId = id;
-            document.getElementById('tab-1').classList.toggle('active-tab', id === 1);
-            document.getElementById('tab-2').classList.toggle('active-tab', id === 2);
+        function setSport(id) {
+            sportId = id;
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active', 'text-black'));
+            document.getElementById(`btn-${id}`).classList.add('active');
             render();
         }
 
@@ -63,55 +58,49 @@
             const grid = document.getElementById('match-grid');
             grid.innerHTML = '';
 
-            // Lọc trận đấu dựa trên thuộc tính sport_type_id của trang gốc
-            const filtered = allMatches.filter(m => {
-                // Nếu trang gốc không có sport_type_id, ta dựa vào tên giải đấu
-                const sId = m.sport_type_id || m.sport_id || (m.league_name?.toLowerCase().includes('nba') ? 2 : 1);
-                return sId == currentSportId;
+            // Lọc chính xác theo sport_type_id từ API gốc
+            const filtered = allData.filter(m => {
+                const type = m.sport_type_id || (m.league_name?.toLowerCase().includes('nba') ? 2 : 1);
+                return type == sportId;
             });
 
             if (filtered.length === 0) {
-                grid.innerHTML = `<p class="col-span-full text-center py-10 text-gray-500 italic">Hiện không có trận nào.</p>`;
+                grid.innerHTML = `<p class="col-span-full text-center py-20 text-gray-500 italic uppercase">Hiện không có trận đấu nào khả dụng</p>`;
                 return;
             }
 
             filtered.forEach(m => {
-                // TỰ ĐỘNG DÒ TÌM ID (Tránh lỗi undefined)
-                const mid = m.match_id || m.id || m.matchId || m.match_uuid;
-                if (!mid) return;
+                const mid = m.match_id || m.id;
+                // Trận đấu đang live nếu status là 1 hoặc có tỉ số
+                const isLive = m.status == "1" || (parseInt(m.home_score) + parseInt(m.away_score) > 0);
 
-                const hName = m.home_name || m.homeName || "Đội nhà";
-                const aName = m.away_name || m.awayName || "Đội khách";
-                const hLogo = m.home_logo || m.homeLogo || "https://via.placeholder.com/50";
-                const aLogo = m.away_logo || m.awayLogo || "https://via.placeholder.com/50";
-                
                 grid.innerHTML += `
-                    <div class="match-card p-5 flex flex-col gap-4 shadow-xl">
-                        <div class="flex justify-between items-center border-b pb-2 text-[10px] font-bold text-gray-400">
-                            <span class="truncate w-40 uppercase">${m.league_name || 'Tournament'}</span>
-                            <span class="live-tag text-white px-2 py-0.5 rounded italic">LIVE</span>
+                    <div class="match-card p-5 flex flex-col gap-4 shadow-lg">
+                        <div class="flex justify-between items-center border-b border-gray-100 pb-2">
+                            <span class="text-[10px] font-black text-gray-400 uppercase truncate w-40">${m.league_name || 'Giải đấu'}</span>
+                            ${isLive ? '<span class="live-tag text-white px-2 py-0.5 rounded text-[9px] font-bold">LIVE</span>' : ''}
                         </div>
-                        <div class="flex items-center justify-between gap-2">
+                        <div class="flex items-center justify-between gap-1">
                             <div class="w-[35%] flex flex-col items-center text-center">
-                                <img src="${hLogo}" class="size-10 object-contain mb-1 border rounded-full p-1">
-                                <span class="text-[11px] font-bold h-8 overflow-hidden">${hName}</span>
+                                <img src="${m.home_logo}" class="size-12 object-contain mb-2 rounded-full border p-1" onerror="this.src='https://via.placeholder.com/50'">
+                                <span class="text-[11px] font-black h-8 overflow-hidden">${m.home_name}</span>
                             </div>
                             <div class="w-[30%] text-center">
                                 <span class="text-2xl font-black text-blue-900">${m.home_score || 0}-${m.away_score || 0}</span>
-                                <p class="text-[9px] font-bold text-red-600 mt-1 uppercase">${m.time_status || 'LIVE'}</p>
+                                <p class="text-[9px] font-bold text-red-500 mt-1 uppercase italic">${isLive ? 'Đang đá' : 'Sắp đá'}</p>
                             </div>
                             <div class="w-[35%] flex flex-col items-center text-center">
-                                <img src="${aLogo}" class="size-10 object-contain mb-1 border rounded-full p-1">
-                                <span class="text-[11px] font-bold h-8 overflow-hidden">${aName}</span>
+                                <img src="${m.away_logo}" class="size-12 object-contain mb-2 rounded-full border p-1" onerror="this.src='https://via.placeholder.com/50'">
+                                <span class="text-[11px] font-black h-8 overflow-hidden">${m.away_name}</span>
                             </div>
                         </div>
-                        <a href="watch.html?id=${mid}" class="block bg-blue-700 hover:bg-yellow-400 hover:text-black text-white text-center py-3 rounded-xl font-black text-xs transition-all uppercase">XEM NGAY</a>
+                        <a href="watch.html?id=${mid}" class="block bg-blue-700 hover:bg-yellow-400 hover:text-black text-white text-center py-3 rounded-xl font-black text-xs transition-all uppercase tracking-widest">Xem trực tiếp</a>
                     </div>
                 `;
             });
         }
         loadMatches();
-        setInterval(loadMatches, 30000);
+        setInterval(loadMatches, 30000); // Cập nhật tỉ số mỗi 30s
     </script>
 </body>
 </html>
