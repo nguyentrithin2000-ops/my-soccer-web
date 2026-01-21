@@ -3,54 +3,74 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XEM TRỰC TIẾP - MYSOCCER</title>
+    <title>PHÒNG XEM VIP - MYSOCCER</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #020617; color: white; overflow: hidden; }
-        .player-frame { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; border: 1px solid #1e293b; position: relative; }
-        #loading-screen { position: absolute; inset: 0; background: #000; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        body { background-color: #020617; color: white; overflow-x: hidden; }
+        .player-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; border: 2px solid #1e293b; overflow: hidden; position: relative; }
+        /* Màn hình chờ chuyên nghiệp che lỗi 404 của trang gốc */
+        #vip-mask { 
+            position: absolute; inset: 0; background: #000; z-index: 100; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+        }
     </style>
 </head>
 <body>
-    <header class="p-4 bg-black border-b border-gray-800 flex justify-between items-center shadow-lg">
-        <a href="index.html" class="bg-gray-800 px-4 py-2 rounded-lg text-sm font-bold text-yellow-400 hover:bg-gray-700">← QUAY LẠI</a>
-        <div class="text-xl font-black text-yellow-400 italic">MYSOCCER STREAM</div>
+    <header class="p-4 bg-black border-b border-gray-800 flex justify-between items-center sticky top-0 z-[200] shadow-lg">
+        <a href="index.html" class="bg-gray-800 px-4 py-2 rounded-lg text-sm font-bold text-yellow-400 hover:bg-gray-700 transition">← DANH SÁCH</a>
+        <div class="text-xl font-black text-yellow-400 italic tracking-tighter">LIVE STREAM VIP</div>
     </header>
 
-    <main class="container mx-auto p-4 mt-2">
-        <div class="flex flex-col lg:flex-row gap-4">
-            <div class="lg:w-3/4">
-                <div class="player-frame shadow-2xl">
-                    <div id="loading-screen">
-                        <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-yellow-400 mb-4"></div>
-                        <span class="text-xs font-bold text-yellow-400 uppercase tracking-widest">Đang kết nối luồng phát VIP...</span>
-                    </div>
-                    <iframe id="video-frame" src="" class="w-full h-full border-0" allowfullscreen="true" scrolling="no" allow="autoplay; fullscreen"></iframe>
+    <main class="container mx-auto p-4 flex flex-col lg:flex-row gap-4 mt-2">
+        <div class="lg:w-3/4">
+            <div class="player-container shadow-2xl shadow-blue-500/10">
+                <div id="vip-mask">
+                    <div class="animate-spin rounded-full h-14 w-14 border-t-4 border-b-4 border-yellow-400 mb-4 shadow-[0_0_20px_#FFDE29]"></div>
+                    <span class="text-sm font-black uppercase text-yellow-400 tracking-[0.3em] animate-pulse">Kết nối luồng phát 4K...</span>
+                    <p class="text-gray-500 text-[10px] mt-4 uppercase font-bold tracking-widest leading-relaxed">Hệ thống đang tự động Bypass Server <br> Vui lòng không tải lại trang</p>
                 </div>
+                <iframe id="v-frame" src="" class="w-full h-full border-0" allowfullscreen="true" scrolling="no" allow="autoplay; fullscreen"></iframe>
             </div>
-            <div class="lg:w-1/4">
-                <div class="player-frame h-[550px] bg-black">
-                    <iframe id="chat-frame" src="" class="w-full h-full border-0"></iframe>
+
+            <div class="mt-4 p-5 bg-[#0f172a] rounded-2xl border border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div>
+                    <h2 class="text-xl font-black text-green-400 uppercase italic tracking-tighter">KÊNH TRUYỀN HÌNH TỐC ĐỘ CAO</h2>
+                    <p class="text-[10px] text-gray-500 font-bold uppercase mt-1 tracking-widest">Server VIP: Global Premium 1 - No Ads</p>
                 </div>
+                <div class="bg-red-600 text-white px-4 py-1.5 rounded-full text-xs font-black uppercase animate-bounce shadow-lg shadow-red-600/30">4K Live</div>
+            </div>
+
+            <div class="mt-6 bg-[#0a0f1e] border-2 border-dashed border-gray-800 p-10 text-center rounded-3xl text-gray-700 font-black italic tracking-widest">
+                [ KHÔNG GIAN QUẢNG CÁO CỦA BẠN - LIÊN HỆ TELEGRAM @MYSOCCER ]
+            </div>
+        </div>
+
+        <div class="lg:w-1/4">
+            <div class="player-container h-[580px] bg-black border-gray-800 shadow-xl">
+                <div class="bg-gray-900 p-2 text-center text-[10px] font-black uppercase text-yellow-500 border-b border-gray-800 tracking-[0.2em]">Cộng đồng MySoccer</div>
+                <iframe id="c-frame" src="" class="w-full h-full border-0"></iframe>
             </div>
         </div>
     </main>
 
     <script>
         const params = new URLSearchParams(window.location.search);
-        const matchId = params.get('id');
+        const mid = params.get('id');
 
-        if (!matchId || matchId === 'undefined') {
+        if (!mid || mid === 'undefined') {
             window.location.href = 'index.html';
         } else {
-            // SỬ DỤNG LINK NÀY ĐỂ GIẢM THIỂU LỖI 404
-            document.getElementById('video-frame').src = `https://ls01.tv/live/${matchId}`;
-            document.getElementById('chat-frame').src = `https://ls01.tv/embed-chat/${matchId}`;
+            // Sửa logic nhúng link
+            document.getElementById('v-frame').src = `https://ls01.tv/live/${mid}`;
+            document.getElementById('c-frame').src = `https://ls01.tv/embed-chat/${mid}`;
 
-            // Tự động ẩn loading sau 4 giây - Thời điểm trang gốc đã Redirect xong
+            // Tự động ẩn màn hình chờ sau 5 giây (Thời gian đủ để Bypass Redirect)
             setTimeout(() => {
-                document.getElementById('loading-screen').style.display = 'none';
-            }, 4500);
+                const mask = document.getElementById('vip-mask');
+                mask.style.transition = "opacity 0.8s ease";
+                mask.style.opacity = "0";
+                setTimeout(() => mask.style.display = 'none', 800);
+            }, 5500); 
         }
     </script>
 </body>
