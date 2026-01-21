@@ -6,30 +6,30 @@
     <title>XEM TRỰC TIẾP - MYSOCCER</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #020617; color: white; }
-        .player-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; overflow: hidden; position: relative; border: 1px solid #1e293b; }
-        #loading { position: absolute; inset: 0; background: #000; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        body { background-color: #020617; color: white; overflow: hidden; }
+        .player-frame { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; border: 1px solid #1e293b; position: relative; }
+        #loading-screen { position: absolute; inset: 0; background: #000; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
-    <header class="p-4 bg-black border-b border-gray-800 flex justify-between items-center">
-        <a href="index.html" class="bg-gray-800 px-4 py-2 rounded-lg text-sm font-bold text-yellow-400">← QUAY LẠI</a>
-        <div class="text-xl font-black text-yellow-400 italic">MYSOCCER LIVE</div>
+    <header class="p-4 bg-black border-b border-gray-800 flex justify-between items-center shadow-lg">
+        <a href="index.html" class="bg-gray-800 px-4 py-2 rounded-lg text-sm font-bold text-yellow-400 hover:bg-gray-700">← QUAY LẠI</a>
+        <div class="text-xl font-black text-yellow-400 italic">MYSOCCER STREAM</div>
     </header>
 
     <main class="container mx-auto p-4 mt-2">
         <div class="flex flex-col lg:flex-row gap-4">
             <div class="lg:w-3/4">
-                <div class="player-container">
-                    <div id="loading">
+                <div class="player-frame shadow-2xl">
+                    <div id="loading-screen">
                         <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-yellow-400 mb-4"></div>
-                        <span class="text-xs font-bold text-yellow-400 uppercase tracking-widest">Đang kết nối Server luồng phát...</span>
+                        <span class="text-xs font-bold text-yellow-400 uppercase tracking-widest">Đang kết nối luồng phát VIP...</span>
                     </div>
                     <iframe id="video-frame" src="" class="w-full h-full border-0" allowfullscreen="true" scrolling="no" allow="autoplay; fullscreen"></iframe>
                 </div>
             </div>
             <div class="lg:w-1/4">
-                <div class="player-container h-[550px] bg-black">
+                <div class="player-frame h-[550px] bg-black">
                     <iframe id="chat-frame" src="" class="w-full h-full border-0"></iframe>
                 </div>
             </div>
@@ -38,19 +38,19 @@
 
     <script>
         const params = new URLSearchParams(window.location.search);
-        const id = params.get('id');
+        const matchId = params.get('id');
 
-        if (!id || id === 'undefined') {
+        if (!matchId || matchId === 'undefined') {
             window.location.href = 'index.html';
         } else {
-            // Nhúng link trực tiếp để tránh lỗi 404 và chờ đợi
-            document.getElementById('video-frame').src = `https://ls01.tv/live/${id}`;
-            document.getElementById('chat-frame').src = `https://ls01.tv/embed-chat/${id}`;
+            // SỬ DỤNG LINK NÀY ĐỂ GIẢM THIỂU LỖI 404
+            document.getElementById('video-frame').src = `https://ls01.tv/live/${matchId}`;
+            document.getElementById('chat-frame').src = `https://ls01.tv/embed-chat/${matchId}`;
 
-            // Ẩn màn hình chờ sau 5 giây
+            // Tự động ẩn loading sau 4 giây - Thời điểm trang gốc đã Redirect xong
             setTimeout(() => {
-                document.getElementById('loading').style.display = 'none';
-            }, 5000);
+                document.getElementById('loading-screen').style.display = 'none';
+            }, 4500);
         }
     </script>
 </body>
