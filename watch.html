@@ -3,50 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PHÒNG LIVE THỂ THAO VIP - MYSOCCER</title>
+    <title>LIVE VIP - MYSOCCER</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #020617; color: white; font-family: sans-serif; }
+        body { background-color: #020617; color: white; }
         .player-container { width: 100%; aspect-ratio: 16/9; background: #000; border-radius: 12px; border: 2px solid #1e293b; overflow: hidden; position: relative; }
         #loading-overlay { position: absolute; inset: 0; background: #000; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
-    <header class="p-4 bg-black border-b border-gray-800 flex justify-between items-center sticky top-0 z-[200]">
-        <a href="index.html" class="bg-gray-800 px-4 py-2 rounded-lg text-sm font-bold text-yellow-400 hover:bg-gray-700 transition">← DANH SÁCH</a>
-        <div class="text-xl font-black text-yellow-400 uppercase tracking-tighter italic">LIVE VIP</div>
+    <header class="p-4 bg-black border-b border-gray-800 flex justify-between items-center">
+        <a href="index.html" class="bg-gray-800 px-4 py-2 rounded-lg text-sm font-bold text-yellow-400 hover:bg-gray-700">← QUAY LẠI</a>
+        <div class="text-xl font-black text-yellow-400 italic">LIVE STREAM VIP</div>
     </header>
 
-    <main class="container mx-auto p-4 flex flex-col lg:flex-row gap-4 mt-2">
+    <main class="container mx-auto p-4 flex flex-col lg:flex-row gap-4">
         <div class="lg:w-3/4">
-            <div class="player-container shadow-2xl shadow-blue-500/10">
+            <div class="player-container shadow-2xl">
                 <div id="loading-overlay">
-                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-400 mb-4"></div>
-                    <span class="text-xs font-black uppercase text-yellow-400 tracking-widest">Đang tải luồng phát HD...</span>
-                    <p class="text-gray-500 text-[10px] mt-2 italic">Tự động kết nối server nhanh nhất</p>
+                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-yellow-400 mb-4"></div>
+                    <span class="text-xs font-black uppercase text-yellow-400">Đang đồng bộ luồng phát VIP...</span>
                 </div>
                 <iframe id="video-frame" src="" class="w-full h-full border-0" allowfullscreen="true" scrolling="no" allow="autoplay; fullscreen"></iframe>
             </div>
-
-            <div class="mt-4 p-5 bg-[#0f172a] rounded-2xl border border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4">
-                <div>
-                    <h2 class="text-xl font-black text-green-400 uppercase italic">TRỰC TIẾP TỐC ĐỘ CAO</h2>
-                    <p class="text-[10px] text-gray-500 font-bold uppercase mt-1 tracking-wider">Cung cấp bởi hệ thống MySoccer Global VIP</p>
-                </div>
-                <div class="flex gap-2">
-                    <span class="bg-blue-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase">Full HD 1080p</span>
-                    <span class="bg-red-600 text-white px-3 py-1 rounded-full text-[10px] font-black uppercase animate-pulse">Live</span>
-                </div>
-            </div>
-
-            <div class="mt-6 bg-[#0f172a] border-2 border-dashed border-gray-800 p-10 text-center rounded-2xl text-gray-600 font-black">
-                [ CHỖ ĐỂ QUẢNG CÁO CỦA BẠN - TĂNG THU NHẬP TẠI ĐÂY ]
+            <div class="mt-4 p-5 bg-[#0f172a] rounded-2xl border border-gray-800">
+                <h2 class="text-xl font-black text-green-400 uppercase italic">TỐC ĐỘ CAO - KHÔNG QUẢNG CÁO</h2>
+                <p class="text-[10px] text-gray-500 font-bold uppercase mt-1">Cung cấp bởi MySoccer Global Server</p>
             </div>
         </div>
 
         <div class="lg:w-1/4">
             <div class="player-container h-[550px] bg-black border-gray-800">
-                <div class="bg-gray-900 p-2 text-center text-[10px] font-black uppercase text-yellow-500 border-b border-gray-800 tracking-widest">Cộng đồng sôi nổi</div>
+                <div class="bg-gray-900 p-2 text-center text-[10px] font-black uppercase text-yellow-500 border-b border-gray-800">Cộng đồng sôi nổi</div>
                 <iframe id="chat-frame" src="" class="w-full h-full border-0"></iframe>
             </div>
         </div>
@@ -57,19 +45,16 @@
         const matchId = params.get('id');
 
         if (matchId && matchId !== 'undefined') {
-            // Sửa lỗi: Nhúng đúng cấu trúc ID từ nccsc
+            // Nhúng luồng phát trực tiếp
             document.getElementById('video-frame').src = `https://ls01.tv/live/${matchId}`;
             document.getElementById('chat-frame').src = `https://ls01.tv/embed-chat/${matchId}`;
 
-            // Tự động tắt màn hình chờ sau 5 giây (Thời điểm video bắt đầu chạy)
+            // Ẩn màn hình chờ sau 5 giây khi video đã sẵn sàng
             setTimeout(() => {
-                const overlay = document.getElementById('loading-overlay');
-                overlay.style.transition = "opacity 1s ease";
-                overlay.style.opacity = "0";
-                setTimeout(() => overlay.style.display = 'none', 1000);
+                document.getElementById('loading-overlay').style.display = 'none';
             }, 5000);
         } else {
-            document.getElementById('loading-overlay').innerHTML = "<p class='text-red-500 font-black'>TRẬN ĐẤU ĐÃ KẾT THÚC HOẶC KHÔNG TỒN TẠI!</p>";
+            document.getElementById('loading-overlay').innerHTML = "<p class='text-red-500 font-black italic'>DỮ LIỆU TRẬN ĐẤU KHÔNG HỢP LỆ!</p>";
         }
     </script>
 </body>
