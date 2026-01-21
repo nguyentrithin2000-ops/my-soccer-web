@@ -9,14 +9,27 @@
     <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 </head>
 <body class="bg-[#0f172a] text-white">
-    <header class="p-4 border-b border-gray-700">
-        <a href="index.html" class="text-xl font-bold text-yellow-400">← QUAY LẠI</a>
+    <header class="p-4 bg-black border-b border-gray-800">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="index.html" class="font-bold text-yellow-400">← QUAY LẠI</a>
+            <div class="text-xl font-black text-yellow-400">MY<span class="text-white">SOCCER</span></div>
+        </div>
     </header>
-    <main class="container mx-auto p-4">
-        <div id="video-container" class="w-full aspect-video bg-black rounded-lg shadow-2xl"></div>
-        <div class="mt-4 p-4 bg-gray-800 rounded-lg">
-            <h2 class="text-xl font-bold text-green-400">Trình phát trực tiếp chất lượng cao</h2>
-            <p class="text-sm text-gray-400 mt-1">Lưu ý: Nếu video không load, vui lòng làm mới trang.</p>
+
+    <main class="container mx-auto p-4 flex flex-col lg:flex-row gap-6 mt-4">
+        <div class="lg:w-2/3">
+            <div id="video-container" class="w-full aspect-video bg-black rounded-xl overflow-hidden border-2 border-gray-700 shadow-2xl"></div>
+            <div class="mt-4 p-5 bg-gray-900 rounded-xl border border-gray-800">
+                <h2 class="text-xl font-bold text-green-400 mb-1">Đang phát sóng chất lượng 4K</h2>
+                <p class="text-gray-400 text-xs">Nếu bị đứng hình, vui lòng nhấn F5 để tải lại link mới nhất.</p>
+            </div>
+        </div>
+
+        <div class="lg:w-1/3">
+            <div class="bg-black rounded-xl overflow-hidden border border-gray-800 h-[500px]">
+                <div class="bg-gray-800 p-2 text-center text-xs font-bold uppercase tracking-widest">Phòng chat bóng đá</div>
+                <iframe id="chat-frame" src="" class="w-full h-full border-0"></iframe>
+            </div>
         </div>
     </main>
 
@@ -24,29 +37,37 @@
         const urlParams = new URLSearchParams(window.location.search);
         const matchId = urlParams.get('id');
 
-        if (matchId && matchId !== 'undefined') {
-            const art = new ArtPlayer({
-                container: '#video-container',
-                url: `https://vips-stream.akamaized.net/live/${matchId}/playlist.m3u8`, // Link cấu trúc mẫu, nccsc thường đổi link tùy giải
-                type: 'm3u8',
-                customType: {
-                    m3u8: function (video, url) {
-                        if (Hls.isSupported()) {
-                            const hls = new Hls();
-                            hls.loadSource(url);
-                            hls.attachMedia(video);
-                        } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                            video.src = url;
-                        }
-                    },
-                },
-                autoplay: true,
-                fullscreen: true,
-                setting: true,
-            });
-        } else {
-            document.getElementById('video-container').innerHTML = "<p class='text-center py-20'>ID trận đấu không hợp lệ.</p>";
+        if (!matchId || matchId === 'undefined') {
+            alert("ID trận đấu không hợp lệ!");
+            window.location.href = 'index.html';
         }
+
+        // Tự động nhúng chat từ server gốc
+        document.getElementById('chat-frame').src = `https://ls01.tv/embed-chat/${matchId}`;
+
+        // Cấu hình phát video. 
+        // Lưu ý quan trọng: Link m3u8 của NCCSC thường đổi domain liên tục. 
+        // Đây là cấu trúc cơ bản, nếu không chạy bạn cần báo mình để soi lại link nguồn.
+        const art = new ArtPlayer({
+            container: '#video-container',
+            url: `https://vips-stream.akamaized.net/live/${matchId}/playlist.m3u8`, 
+            type: 'm3u8',
+            customType: {
+                m3u8: function (video, url) {
+                    if (Hls.isSupported()) {
+                        const hls = new Hls();
+                        hls.loadSource(url);
+                        hls.attachMedia(video);
+                    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+                        video.src = url;
+                    }
+                },
+            },
+            autoplay: true,
+            fullscreen: true,
+            setting: true,
+            pip: true,
+        });
     </script>
 </body>
 </html>
