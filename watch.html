@@ -3,85 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đang xem Trực Tiếp - MYSOCCER</title>
+    <title>PHÒNG LIVE VIP - MYSOCCER</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #0a0a0a; color: white; overflow-x: hidden; }
-        .video-wrapper { width: 100%; aspect-ratio: 16/9; position: relative; background: #000; border-radius: 12px; border: 1px solid #333; }
-        /* Lớp mặt nạ để che đi lỗi 404/Redirect của trang gốc */
-        #loading-mask {
-            position: absolute; inset: 0; background: #000; z-index: 50;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
+        body { background-color: #020617; color: white; }
+        .player-wrapper { width: 100%; aspect-ratio: 16/9; background: #000; border: 2px solid #1e293b; border-radius: 12px; position: relative; }
+        #mask { position: absolute; inset: 0; background: #000; z-index: 100; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
 <body>
-    <header class="p-4 border-b border-gray-800 flex justify-between items-center bg-black sticky top-0 z-[100]">
-        <a href="index.html" class="text-yellow-400 font-bold flex items-center gap-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
-            QUAY LẠI
-        </a>
-        <div class="text-xl font-black text-yellow-400">MY<span class="text-white">SOCCER</span></div>
+    <header class="p-4 bg-black border-b border-gray-800 flex justify-between items-center">
+        <a href="index.html" class="bg-gray-800 px-4 py-2 rounded-lg text-sm font-bold text-yellow-400 hover:bg-gray-700">← TRỞ VỀ</a>
+        <div class="text-xl font-black text-yellow-400 uppercase tracking-tighter">PHÒNG LIVE VIP</div>
     </header>
 
-    <main class="container mx-auto p-4 flex flex-col lg:flex-row gap-4">
-        <div class="lg:w-[70%]">
-            <div class="video-wrapper shadow-2xl overflow-hidden">
-                <div id="loading-mask">
-                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-yellow-400 mb-4"></div>
-                    <p class="text-yellow-400 font-bold animate-pulse uppercase tracking-tighter">Đang kết nối luồng phát VIP...</p>
-                    <p class="text-gray-500 text-[10px] mt-2 italic">Vui lòng chờ trong giây lát (Auto Bypass)</p>
+    <main class="container mx-auto p-4 flex flex-col lg:flex-row gap-4 mt-2">
+        <div class="lg:w-3/4">
+            <div class="player-wrapper overflow-hidden shadow-2xl">
+                <div id="mask">
+                    <div class="animate-spin rounded-full h-10 w-10 border-t-2 border-yellow-400 mb-2"></div>
+                    <span class="text-xs font-bold text-yellow-400 uppercase">Đang mở luồng phát...</span>
                 </div>
-                
-                <iframe id="video-frame" 
-                        src="" 
-                        class="w-full h-full border-0" 
-                        allow="autoplay; fullscreen" 
-                        allowfullscreen="true" 
-                        scrolling="no">
-                </iframe>
+                <iframe id="v-frame" src="" class="w-full h-full border-0" allowfullscreen="true" allow="autoplay"></iframe>
             </div>
-
-            <div class="mt-4 p-5 bg-zinc-900 rounded-xl border border-zinc-800">
-                <h2 class="text-xl font-black text-green-400 uppercase italic">Link Xem Trực Tiếp Tốc Độ Cao</h2>
-                <div class="flex gap-4 mt-2 text-[11px] font-bold text-gray-400 uppercase">
-                    <span>• Không Quảng Cáo Rác</span>
-                    <span>• Full HD 1080p</span>
-                    <span>• Bình Luận Tiếng Việt</span>
+            <div class="mt-4 p-4 bg-slate-900 rounded-xl flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-black text-green-400 uppercase">Trực Tiếp HD Không Giật Lag</h2>
+                    <p class="text-[10px] text-gray-500 uppercase">Nguồn: Global Stream VIP - Cập nhật tự động</p>
                 </div>
-            </div>
-            
-            <div class="mt-6 bg-zinc-900 border border-dashed border-zinc-700 p-8 text-center rounded-xl text-zinc-500 font-bold">
-                [ CHÈN BANNER QUẢNG CÁO CỦA BẠN TẠI ĐÂY ]
+                <div class="hidden md:block bg-red-600 px-3 py-1 rounded text-xs font-bold animate-pulse">4K SERVER</div>
             </div>
         </div>
 
-        <div class="lg:w-[30%]">
-            <div class="video-wrapper h-[550px] border border-gray-800 bg-zinc-900">
-                <div class="bg-zinc-800 p-3 text-center text-xs font-black uppercase text-yellow-400 border-b border-zinc-700">Phòng Chat Cộng Đồng</div>
-                <iframe id="chat-frame" src="" class="w-full h-full border-0"></iframe>
+        <div class="lg:w-1/4">
+            <div class="player-wrapper h-[500px] bg-slate-900 border-gray-800">
+                <div class="bg-gray-800 p-2 text-center text-[10px] font-bold uppercase text-gray-400">Chat Box</div>
+                <iframe id="c-frame" src="" class="w-full h-full border-0"></iframe>
             </div>
         </div>
     </main>
 
     <script>
-        const urlParams = new URLSearchParams(window.location.search);
-        const matchId = urlParams.get('id');
+        const params = new URLSearchParams(window.location.search);
+        const id = params.get('id');
 
-        if (!matchId || matchId === 'undefined') {
-            window.location.href = 'index.html';
-        } else {
-            // Nhúng player LuongSon (Sử dụng domain trực tiếp để giảm redirect)
-            document.getElementById('video-frame').src = `https://ls01.tv/live/${matchId}`;
-            document.getElementById('chat-frame').src = `https://ls01.tv/embed-chat/${matchId}`;
+        if (id && id !== 'undefined') {
+            // Nhúng trực tiếp từ server LuongSon để ổn định nhất
+            document.getElementById('v-frame').src = `https://ls01.tv/live/${id}`;
+            document.getElementById('c-frame').src = `https://ls01.tv/embed-chat/${id}`;
 
-            // Tự động ẩn lớp mặt nạ sau 6 giây (Thời gian đủ để trang gốc bypass lỗi 404)
+            // Ẩn lớp mask sau 5 giây
             setTimeout(() => {
-                const mask = document.getElementById('loading-mask');
-                mask.style.transition = "opacity 1s ease";
-                mask.style.opacity = "0";
-                setTimeout(() => mask.style.display = "none", 1000);
-            }, 6000); 
+                document.getElementById('mask').style.display = 'none';
+            }, 5000);
+        } else {
+            document.getElementById('mask').innerHTML = "<p class='text-red-500'>TRẬN ĐẤU KHÔNG TỒN TẠI!</p>";
         }
     </script>
 </body>
