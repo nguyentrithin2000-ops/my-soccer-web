@@ -3,79 +3,89 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MYSOCCER - Trực Tiếp Bóng Đá</title>
+    <title>MYSOCCER - Trực Tiếp Bóng Đá Số 1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #141516; color: white; font-family: sans-serif; }
-        .match-card { background: white; color: black; border-radius: 12px; border: 1px solid #FFDE29; transition: 0.3s; overflow: hidden; }
-        .match-card:hover { transform: translateY(-5px); box-shadow: 0 5px 15px rgba(255,222,41,0.3); }
+        .match-card { background: #ffffff; color: #000; border-radius: 12px; overflow: hidden; border: 1px solid #FFDE29; transition: 0.3s; }
+        .match-card:hover { transform: translateY(-5px); box-shadow: 0 8px 20px rgba(255,222,41,0.2); }
         .live-tag { background: #f00000; animation: blink 1.5s infinite; }
         @keyframes blink { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
     </style>
 </head>
 <body>
-    <header class="bg-[#0a0a0a] border-b-2 border-[#FFDE29] p-4 sticky top-0 z-50">
+    <header class="bg-[#0a0a0a] border-b-2 border-[#FFDE29] p-4 sticky top-0 z-50 shadow-xl">
         <div class="container mx-auto flex justify-between items-center">
             <div class="text-3xl font-black text-[#FFDE29]">MY<span class="text-white">SOCCER</span></div>
-            <div class="bg-red-600 px-3 py-1 rounded-full text-[10px] font-bold">LIVE</div>
+            <div class="bg-red-600 px-3 py-1 rounded-full text-[10px] font-bold animate-pulse">LIVE</div>
         </div>
     </header>
 
     <main class="container mx-auto px-4 py-10">
-        <h1 class="text-2xl font-bold mb-10 text-center text-[#a0fb64] uppercase tracking-widest">Trực Tiếp Hôm Nay</h1>
+        <h1 class="text-2xl font-bold mb-10 text-center text-[#a0fb64] uppercase tracking-widest">Trực Tiếp Bóng Đá</h1>
         <div id="match-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            <div class="col-span-full text-center py-20">Đang đồng bộ dữ liệu...</div>
+            <div class="col-span-full text-center py-20 text-gray-500">Đang tải dữ liệu trận đấu...</div>
         </div>
     </main>
+
+    <footer class="bg-black py-10 border-t border-gray-800 text-center mt-20">
+        <div class="bg-gray-800 p-4 mb-4 inline-block w-full max-w-xl rounded text-yellow-500 font-bold border border-dashed border-gray-600">
+            [ QUẢNG CÁO CỦA BẠN TẠI ĐÂY ]
+        </div>
+        <p class="text-gray-600 text-xs">© 2026 MYSOCCER - Live Sports Auto</p>
+    </footer>
 
     <script>
         async function loadMatches() {
             const grid = document.getElementById('match-grid');
             try {
-                // Gọi API thông qua thư mục api/ của Vercel
                 const response = await fetch("/api/get-matches");
                 const result = await response.json();
                 
-                // Nguồn này thường trả về dữ liệu trong result.value hoặc result.data
-                const matches = result?.value || result?.data || result;
+                // NCCSC trả về dữ liệu trong result.data hoặc result.value.datas
+                const matches = result?.data || result?.value?.datas || result?.value || result;
 
                 if (!Array.isArray(matches) || matches.length === 0) {
-                    grid.innerHTML = '<p class="col-span-full text-center">Hiện chưa có trận đấu nào.</p>';
+                    grid.innerHTML = '<p class="col-span-full text-center py-10">Hiện chưa có trận đấu nào diễn ra.</p>';
                     return;
                 }
 
                 grid.innerHTML = '';
                 matches.forEach(m => {
-                    // Cấu trúc kiểm tra chính xác các trường dữ liệu
-                    const matchId = m.match_id || m.id;
-                    const homeName = m.home_name || "Đội nhà";
-                    const awayName = m.away_name || "Đội khách";
-                    const homeLogo = m.home_logo || "https://via.placeholder.com/50";
-                    const awayLogo = m.away_logo || "https://via.placeholder.com/50";
+                    // Tự động khớp dữ liệu (nccsc dùng home_name, away_name...)
+                    const id = m.match_id || m.id;
+                    const home = m.home_name || "Đội nhà";
+                    const away = m.away_name || "Đội khách";
+                    const hLogo = m.home_logo || "https://via.placeholder.com/50";
+                    const aLogo = m.away_logo || "https://via.placeholder.com/50";
+                    const league = m.league_name || "Giải đấu";
+                    const score = (m.home_score !== undefined) ? `${m.home_score} - ${m.away_score}` : "Sắp đá";
 
                     grid.innerHTML += `
                         <div class="match-card p-4 flex flex-col gap-4">
-                            <div class="flex justify-between text-[10px] font-bold text-gray-500 uppercase">
-                                <span class="truncate w-32">${m.league_name || 'Giải đấu'}</span>
+                            <div class="flex justify-between items-center text-[10px] font-bold text-gray-500 uppercase">
+                                <span class="truncate w-32">${league}</span>
                                 <span class="live-tag text-white px-2 py-0.5 rounded">LIVE</span>
                             </div>
-                            <div class="flex items-center justify-between">
-                                <div class="flex flex-col items-center w-1/3 text-center">
-                                    <img src="${homeLogo}" class="size-10 object-contain mb-1">
-                                    <span class="text-[11px] font-bold leading-tight h-8 overflow-hidden">${homeName}</span>
+                            <div class="flex items-center justify-between gap-1">
+                                <div class="flex flex-col items-center w-1/3">
+                                    <img src="${hLogo}" class="size-10 object-contain mb-1">
+                                    <span class="text-[11px] font-bold text-center h-8 overflow-hidden">${home}</span>
                                 </div>
-                                <div class="text-xl font-black text-blue-800">${m.home_score || 0} - ${m.away_score || 0}</div>
-                                <div class="flex flex-col items-center w-1/3 text-center">
-                                    <img src="${awayLogo}" class="size-10 object-contain mb-1">
-                                    <span class="text-[11px] font-bold leading-tight h-8 overflow-hidden">${awayName}</span>
+                                <div class="text-lg font-black text-blue-900 w-1/3 text-center">${score}</div>
+                                <div class="flex flex-col items-center w-1/3">
+                                    <img src="${aLogo}" class="size-10 object-contain mb-1">
+                                    <span class="text-[11px] font-bold text-center h-8 overflow-hidden">${away}</span>
                                 </div>
                             </div>
-                            <a href="watch.html?id=${matchId}" class="bg-blue-600 hover:bg-blue-700 text-white text-center py-2 rounded-lg font-bold text-xs transition">XEM NGAY</a>
+                            <a href="watch.html?id=${id}" class="block bg-blue-600 hover:bg-blue-700 text-white text-center py-2 rounded-lg font-black text-xs transition uppercase">
+                                Xem trực tiếp
+                            </a>
                         </div>
                     `;
                 });
             } catch (e) {
-                grid.innerHTML = '<div class="col-span-full text-center text-red-500">Lỗi kết nối server. Vui lòng F5.</div>';
+                grid.innerHTML = '<div class="col-span-full text-center text-red-500">Lỗi kết nối API. Vui lòng thử lại.</div>';
             }
         }
         loadMatches();
